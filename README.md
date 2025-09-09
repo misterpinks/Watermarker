@@ -42,16 +42,40 @@ A quick and dirty Tampermonkey userscript that detects invisible watermarks and 
 - `Ctrl+Shift+W` - Force rescan current page
 
 ### What It Detects
-The script identifies 25+ types of invisible characters commonly used for watermarking:
+The script identifies 30 types of invisible characters commonly used for watermarking:
 
-| Character | Unicode | Common Use |
-|-----------|---------|------------|
-| Zero Width Space | U+200B | AI text watermarks |
-| Soft Hyphen | U+00AD | Content tracking |
-| Word Joiner | U+2060 | Text fingerprinting |
-| No-Break Space | U+00A0 | Layout manipulation |
-| Variation Selectors | U+FE00+ | Font rendering tricks |
-| And many more... | | Various steganographic uses |
+| Character | Unicode | Name | Common Use |
+|-----------|---------|------|------------|
+| Null | U+0000 | Null | Control character injection |
+| Record Separator | U+001E | Record Separator | Data structure manipulation |
+| Unit Separator | U+001F | Unit Separator | Text boundary marking |
+| No-Break Space | U+00A0 | No-Break Space | Layout manipulation |
+| Soft Hyphen | U+00AD | Soft Hyphen | Content tracking |
+| Zero Width Space | U+200B | Zero Width Space | AI text watermarks |
+| Zero Width Non-Joiner | U+200C | Zero Width Non-Joiner | Script separation tricks |
+| Zero Width Joiner | U+200D | Zero Width Joiner | Character combination |
+| Left-to-Right Mark | U+200E | Left-to-Right Mark | Text direction control |
+| Right-to-Left Mark | U+200F | Right-to-Left Mark | Text direction control |
+| Left-to-Right Embedding | U+202A | Left-to-Right Embedding | Directional formatting |
+| Right-to-Left Embedding | U+202B | Right-to-Left Embedding | Directional formatting |
+| Pop Directional Formatting | U+202C | Pop Directional Formatting | Directional formatting |
+| Left-to-Right Override | U+202D | Left-to-Right Override | Text direction override |
+| Right-to-Left Override | U+202E | Right-to-Left Override | Text direction override |
+| Narrow No-Break Space | U+202F | Narrow No-Break Space | Precise spacing control |
+| Word Joiner | U+2060 | Word Joiner | Text fingerprinting |
+| Function Application | U+2061 | Function Application (Invisible) | Mathematical formatting |
+| Invisible Times | U+2062 | Invisible Times | Mathematical operators |
+| Invisible Separator | U+2063 | Invisible Separator | Mathematical formatting |
+| Invisible Plus | U+2064 | Invisible Plus | Mathematical operators |
+| Left-to-Right Isolate | U+2066 | Left-to-Right Isolate | Text isolation |
+| Right-to-Left Isolate | U+2067 | Right-to-Left Isolate | Text isolation |
+| First Strong Isolate | U+2068 | First Strong Isolate | Directional isolation |
+| Pop Directional Isolate | U+2069 | Pop Directional Isolate | Directional isolation |
+| Ideographic Space | U+3000 | Ideographic Space | CJK text spacing |
+| Variation Selector-1 | U+FE00 | Variation Selector-1 | Font rendering tricks |
+| En Dash | U+2013 | En Dash | Punctuation substitution |
+| Em Dash | U+2014 | Em Dash | Punctuation substitution |
+| Zero Width No-Break Space | U+FEFF | Zero Width No-Break Space (BOM) | Byte order marking |
 
 
 ### Main Interface
