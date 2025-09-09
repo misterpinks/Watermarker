@@ -46,10 +46,10 @@ The script identifies 30 types of invisible characters commonly used for waterma
 
 | Character | Unicode | Name | Common Use |
 |-----------|---------|------|------------|
-| ​ | U+0000 | Null | Control character injection |
-| ​ | U+001E | Record Separator | Data structure manipulation |
-| ​ | U+001F | Unit Separator | Text boundary marking |
-|  | U+00A0 | No-Break Space | Layout manipulation |
+| [NULL] | U+0000 | Null | Control character injection |
+| [RS] | U+001E | Record Separator | Data structure manipulation |
+| [US] | U+001F | Unit Separator | Text boundary marking |
+| [ ] | U+00A0 | No-Break Space | Layout manipulation |
 | ­ | U+00AD | Soft Hyphen | Content tracking |
 | ​ | U+200B | Zero Width Space | AI text watermarks |
 | ‌ | U+200C | Zero Width Non-Joiner | Script separation tricks |
@@ -61,7 +61,7 @@ The script identifies 30 types of invisible characters commonly used for waterma
 | ‬ | U+202C | Pop Directional Formatting | Directional formatting |
 | ‭ | U+202D | Left-to-Right Override | Text direction override |
 | ‮ | U+202E | Right-to-Left Override | Text direction override |
-|   | U+202F | Narrow No-Break Space | Precise spacing control |
+| [ ] | U+202F | Narrow No-Break Space | Precise spacing control |
 | ⁠ | U+2060 | Word Joiner | Text fingerprinting |
 | ⁡ | U+2061 | Function Application (Invisible) | Mathematical formatting |
 | ⁢ | U+2062 | Invisible Times | Mathematical operators |
@@ -71,11 +71,11 @@ The script identifies 30 types of invisible characters commonly used for waterma
 | ⁧ | U+2067 | Right-to-Left Isolate | Text isolation |
 | ⁨ | U+2068 | First Strong Isolate | Directional isolation |
 | ⁩ | U+2069 | Pop Directional Isolate | Directional isolation |
-| 　 | U+3000 | Ideographic Space | CJK text spacing |
+| [　] | U+3000 | Ideographic Space | CJK text spacing |
 | ︀ | U+FE00 | Variation Selector-1 | Font rendering tricks |
 | – | U+2013 | En Dash | Punctuation substitution |
 | — | U+2014 | Em Dash | Punctuation substitution |
-| ﻿ | U+FEFF | Zero Width No-Break Space (BOM) | Byte order marking |
+| [BOM] | U+FEFF | Zero Width No-Break Space (BOM) | Byte order marking |
 
 
 ### Main Interface
