@@ -1,71 +1,87 @@
 # 🔍 Pinky's AI Watermark Detector
 
-A quick and dirty Tampermonkey userscript that detects invisible watermarks and hidden characters on any webpage. Perfect for identifying AI-generated content watermarks, zero-width spaces, and other steganographic text markers.
+A comprehensive Tampermonkey userscript that detects invisible watermarks, suspicious images, and AI writing patterns on any webpage. Perfect for identifying AI-generated content watermarks, zero-width spaces, steganographic text markers, and AI writing characteristics.
 
-![Version](https://img.shields.io/badge/version-8.2-blue)
+![Version](https://img.shields.io/badge/version-9.1-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Tampermonkey](https://img.shields.io/badge/Tampermonkey-Compatible-orange)
 
 ## ✨ Features
 
-- **🎯 Real-time Detection** - Instantly highlights invisible watermarks as you browse
-- **📊 Detailed Statistics** - Hover over the counter for a breakdown of detected watermark types
-- **🔧 LinkedIn Compatible** - Optimized to work smoothly with dynamic websites
-- **⌨️ Keyboard Shortcuts** - Quick rescan with `Ctrl+Shift+W`
-- **🎨 Visual Indicators** - Clear highlighting with tooltips showing character details
-- **🔄 Auto-updates** - Automatic updates when new versions are released
+### 🎯 Multi-Layer Detection
+- **📝 Invisible Watermarks** - Detects 30+ types of hidden Unicode characters
+- **🖼️ Suspicious Images** - Identifies potential watermark images and oversized files
+- **✍️ AI Writing Patterns** - Recognizes common AI-generated text patterns
+- **📄 PDF Support** - Specialized handling for PDF documents
+
+### 🔧 Advanced Functionality
+- **📊 Detailed Statistics** - Hover counter for comprehensive breakdown
+- **🐛 Debug Mode** - Toggle debug information with 'D' button
+- **⚡ Real-time Detection** - Instant highlighting as you browse
+- **🔄 Auto-updates** - Automatic script updates from GitHub
+- **⌨️ Keyboard Shortcuts** - Multiple hotkeys for quick access
+- **🔗 LinkedIn Compatible** - Optimized for dynamic social media sites
+
+### 🎨 Visual Interface
+- **Three-Part Counter** - Shows watermarks•images•patterns (e.g., "5•2•8")
+- **Color-Coded Highlights** - Red for watermarks, orange for AI patterns
+- **Smart Tooltips** - Detailed information on hover
+- **PDF Mode Interface** - Special UI for PDF document analysis
 
 ## 🚀 Quick Install
 
 ### Option 1: Direct Install (Recommended)
 1. Install [Tampermonkey](https://www.tampermonkey.net/) browser extension
-2. **[Click here to install the script](https://github.com/misterpinks/Watermarker/raw/refs/heads/main/watermark-detector.user.js)**
+2. **[Click here to install the script](https://github.com/misterpinks/Watermarker/raw/main/watermark-detector.user.js)**
 3. Click "Install" when Tampermonkey opens
-4. You're done! The red counter will appear on websites with watermarks (Scrill down and you should see some red W's)
+4. You're done! The counter will appear on websites with detected content
 
 ### Option 2: Manual Install
-1. Download the [latest script file](https://github.com/misterpinks/Watermarker/raw/refs/heads/main/watermark-detector.user.js)
+1. Download the [latest script file](https://github.com/misterpinks/Watermarker/raw/main/watermark-detector.user.js)
 2. Open Tampermonkey Dashboard
 3. Click "Utilities" tab
 4. Drag and drop the `.user.js` file into the import area
 
-###  N.B. If you want it to see local files
-You will need to Make sure your browser allows extensions to access file URLs:
-1. Go to chrome://extensions/
-2. Find Tampermonkey
-3. Click "Details"
-4. Enable "Allow access to file URLs"
-
-5. Open Tampermonkey dashboard
-6. Go to Settings tab
-7. Find "Config mode" and set it to "Advanced"
-8. Look for Security and "Allow access to file URLs" and set to allow all local files
-9. Hit the save button
+### 📁 Local File Access (Optional)
+To analyze local HTML/PDF files:
+1. Go to `chrome://extensions/`
+2. Find Tampermonkey → Click "Details"
+3. Enable "Allow access to file URLs"
+4. In Tampermonkey dashboard:
+   - Go to Settings tab
+   - Set "Config mode" to "Advanced"
+   - Enable "Allow access to file URLs"
+   - Click Save
 
 ## 🎮 How to Use
 
-### Basic Usage
-- **Red Counter**: Appears in top-right corner when watermarks are detected
-- **Click Counter**: Manually rescan the current page
+### Main Interface
+The counter shows three detection types:
+```
+🔴 5•2•8  ← watermarks•images•patterns
+   D P    ← Debug and Pattern toggles
+```
+
+### Interactive Controls
+- **Click Main Counter**: Rescan page / Show PDF options
+- **'D' Button**: Toggle debug mode (shows processing details)
+- **'P' Button**: Toggle AI writing pattern detection
 - **Hover Counter**: View detailed statistics popup
-- **Red "W" Markers**: Highlighted watermarks throughout the page
-- **Hover Markers**: See specific character details
 
-### Keyboard Shortcuts
-- `Ctrl+Shift+W` - Force rescan current page
+### Detection Categories
 
-### What It Atempts to Detect
-The script looks for 30 types of invisible characters supposedly used for watermarking:
+#### 📝 Invisible Watermarks (Red 'W' markers)
+Detects 30 types of hidden characters:
 
 | Character | Unicode | Name | Common Use |
 |-----------|---------|------|------------|
 | ​ | U+0000 | Null | Control character injection |
 | ​ | U+001E | Record Separator | Data structure manipulation |
 | ​ | U+001F | Unit Separator | Text boundary marking |
-|  | U+00A0 | No-Break Space | Layout manipulation |
+|   | U+00A0 | No-Break Space | Layout manipulation |
 | ­ | U+00AD | Soft Hyphen | Content tracking |
 | ​ | U+200B | Zero Width Space | AI text watermarks |
-| ‌ | U+200C | Zero Width Non-Joiner | Script separation tricks |
+| ‌ | U+200C | Zero Width Non-Joiner | Script separation |
 | ‍ | U+200D | Zero Width Joiner | Character combination |
 | ‎ | U+200E | Left-to-Right Mark | Text direction control |
 | ‏ | U+200F | Right-to-Left Mark | Text direction control |
@@ -90,30 +106,95 @@ The script looks for 30 types of invisible characters supposedly used for waterm
 | — | U+2014 | Em Dash | Punctuation substitution |
 | ﻿ | U+FEFF | Zero Width No-Break Space (BOM) | Byte order marking |
 
+#### 🖼️ Suspicious Images (Orange border + 🖼️ icon)
+Detects potentially watermarked images:
+- Small images with suspicious filenames (bull.png, dot.png, marker.png)
+- Tiny images in list contexts (likely bullet replacements)
+- Unusually large file sizes for simple graphics
+- Images with watermark-related metadata
 
-### Main Interface
-The red counter shows total watermarks found:
-```
-🔴 5  ← Click to rescan, hover for details
-```
+#### ✍️ AI Writing Patterns (Orange underlines)
+Identifies common AI-generated text characteristics:
 
-### Statistics Popup
+**Inflated Symbolism**
+- "stands as a testament"
+- "plays a vital role"
+- "continues to captivate"
+- "watershed moment"
+
+**Promotional Language**
+- "rich cultural heritage"
+- "breathtaking"
+- "must-visit"
+- "stunning natural beauty"
+
+**Editorializing**
+- "it's important to note"
+- "no discussion would be complete without"
+- "in this article"
+
+**Conjunctive Overuse**
+- Excessive use of "moreover", "furthermore", "however"
+
+**Negative Parallelism**
+- "It's not just X, it's Y" structures
+- "Not only X, but Y" patterns
+
+**Superficial Analysis**
+- Empty analytical phrases ending in -ing
+- "ensuring", "highlighting", "emphasizing"
+
+**Vague Attribution**
+- "industry reports", "experts suggest"
+- "studies show" without specifics
+
+**Em Dash Overuse**
+- Excessive use of em dashes for emphasis
+
+### Keyboard Shortcuts
+- `Ctrl+Shift+W` - Force rescan current page
+- `Ctrl+Shift+P` - PDF analysis (PDF mode only)
+- `Ctrl+Shift+I` - Toggle image detection
+- `Ctrl+Shift+T` - Toggle writing pattern detection
+
+### 📄 PDF Mode
+When viewing PDFs, the script switches to specialized mode:
+
+**PDF Interface Features:**
+- Orange pulsing counter indicating PDF mode
+- Click counter for PDF-specific options
+- Download button for offline analysis
+- Limited scan option for accessible content
+
+**PDF Analysis Limitations:**
+- Chrome's PDF viewer blocks text access
+- Recommendation to use Firefox or PDF.js
+- Download PDF for comprehensive analysis
+
+## 📊 Statistics Popup
+
 Hover the counter to see detailed breakdown:
 ```
-┌─────────────────────────────┐
-│ Watermarks Detected: 5      │
-├─────────────────────────────┤
-│ U+200B Zero Width Space  3  │
-│ U+00AD Soft Hyphen       2  │
-└─────────────────────────────┘
-```
-
-### Page Highlighting
-Watermarks appear as red "W" markers with tooltips:
-```
-This is normal text W followed by more text
-                   ↑
-            (Zero Width Space)
+┌─────────────────────────────────┐
+│ AI Detection Results: 15        │
+├─────────────────────────────────┤
+│ 🔴 Invisible Watermarks (5)     │
+│ U+200B Zero Width Space     3   │
+│ U+00AD Soft Hyphen          2   │
+│                                 │
+│ 🖼️ Suspicious Images (2)        │
+│ 1. bullet.png (8×8)             │
+│ 2. marker.svg (12×12)           │
+│                                 │
+│ 📝 AI Writing Patterns (8)      │
+│ Inflated Symbolism         4    │
+│ Promotional Language       2    │
+│ Conjunctive Overuse        2    │
+│                                 │
+│ Recent matches:                 │
+│ "stands as a testament"         │
+│ "rich cultural heritage"        │
+└─────────────────────────────────┘
 ```
 
 ## 🛠️ Development
@@ -121,53 +202,77 @@ This is normal text W followed by more text
 ### Project Structure
 ```
 Watermarker/
-├── Pinky's AI Watermark Detector-8.2.user.js  # Main script
-├── README.md                                   # This file
-└── LICENSE                                     # MIT License
+├── watermark-detector.user.js    # Main script (v9.1)
+├── README.md                      # This file
+└── LICENSE                        # MIT License
 ```
 
+### Configuration Options
+The script includes several configurable options:
+- `maxProcessingTime`: Maximum time for processing (5000ms)
+- `batchSize`: Nodes processed per batch (10)
+- `linkedinSafeMode`: Special handling for LinkedIn
+- `enableImageDetection`: Toggle image watermark detection
+- `enableWritingPatternDetection`: Toggle AI pattern detection
+
+### Global Functions (for console testing)
+- `testWatermarkDetection()` - Manual detection run
+- `toggleWatermarkDebug()` - Toggle debug mode
+- `toggleImageDetection()` - Toggle image detection
+- `togglePatternDetection()` - Toggle pattern detection
+- `downloadCurrentPDF()` - Download current PDF (PDF mode)
+- `tryPDFAnalysis()` - Attempt limited PDF scan
+
 ### Version History
+- **v9.1** - Enhanced AI writing pattern detection, improved PDF support
+- **v9.0** - Added image detection and writing pattern analysis
 - **v8.2** - Enhanced statistics, LinkedIn compatibility fixes
 - **v8.1** - Original public release
 - **v8.0** - Initial development version
-
-### Contributing
-1. Fork this repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
 
 ## 🐛 Troubleshooting
 
 ### Common Issues
 
-**Q: The counter doesn't appear**
-- Make sure Tampermonkey is enabled
-- Check if the website has watermarks to detect
-- Try refreshing the page
+**Q: The counter shows "0•0•0" but I see content**
+- Click the counter to manually rescan
+- Toggle detection modes with 'D' and 'P' buttons
+- Check if content is dynamically loaded
 
-**Q: LinkedIn content not loading properly**
-- The script includes LinkedIn-specific optimizations
-- Try clicking the counter to manually rescan
-- Disable other userscripts temporarily to test conflicts
+**Q: PDF mode shows orange counter but no detection**
+- PDFs have limited text access in Chrome
+- Use Firefox for better PDF.js support
+- Download PDF and analyze with text editor
 
-**Q: Too many false positives**
-- Some websites use legitimate invisible characters
-- The script distinguishes between normal formatting and watermarks
-- Check the statistics popup for character details
+**Q: Too many AI pattern detections**
+- Toggle pattern detection off with 'P' button
+- Some legitimate text may trigger patterns
+- Check statistics popup for specific pattern types
 
-**Q: Performance issues**
-- The script is optimized for minimal impact
-- On very large pages, scanning may take a moment
-- Use manual rescan (click counter) if needed
+**Q: LinkedIn or dynamic sites not working**
+- Script includes LinkedIn-specific optimizations
+- Try manual rescan after page loads completely
+- Disable other userscripts to test conflicts
+
+**Q: Performance issues on large pages**
+- Debug mode shows processing statistics
+- Script processes in batches to minimize impact
+- LinkedIn safe mode limits processing automatically
+
+### Debug Information
+Enable debug mode ('D' button) to see:
+- Processing statistics
+- Node counts and timing
+- Configuration status
+- Real-time detection events
 
 ### Reporting Issues
 Found a bug? Please [open an issue](https://github.com/misterpinks/Watermarker/issues) with:
 - Browser and Tampermonkey version
 - Website where the issue occurred
+- Debug mode information (if available)
 - Steps to reproduce
-- Console error messages (if any)
+- Console error messages
 
 ## 📄 License
 
@@ -175,9 +280,10 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🙏 Acknowledgments
 
-- Inspired by the need to detect AI-generated content watermarks
-- Built for the privacy-conscious community
-- Optimized for real-world usage on popular websites
+- Inspired by the need to detect AI-generated content
+- Community feedback for writing pattern detection
+- Built for privacy-conscious users and researchers
+- Optimized for real-world usage across various websites
 
 ## 📞 Support
 
@@ -189,4 +295,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 **⭐ Star this repo if you find it useful!**
 
-Made with ❤️ for the open web
+*Detection capabilities: Invisible watermarks • Suspicious images • AI writing patterns • PDF analysis*
+
+Made with ❤️ for digital transparency
