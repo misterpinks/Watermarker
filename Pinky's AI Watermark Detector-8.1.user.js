@@ -1,13 +1,13 @@
 // ==UserScript==
-// @name         Pinky's AI Watermark Detector - Enhanced with Image Detection
+// @name         Pinky's AI Watermark & Writing Pattern Detector
 // @namespace    http://tampermonkey.net/
-// @version      8.4
-// @description  Enhanced watermark detector with image detection, detailed stats, LinkedIn compatibility, and debug toggle
+// @version      9.0
+// @description  Enhanced detector with invisible watermarks, image detection, and AI writing pattern recognition
 // @author       @ericpink
 // @homepage     https://github.com/misterpinks/Watermarker
 // @supportURL   https://github.com/misterpinks/Watermarker/issues
-// @updateURL    https://github.com/misterpinks/Watermarker/raw/main/Pinky's%20AI%20Watermark%20Detector-8.4.user.js
-// @downloadURL  https://github.com/misterpinks/Watermarker/raw/main/Pinky's%20AI%20Watermark%20Detector-8.4.user.js
+// @updateURL    https://github.com/misterpinks/Watermarker/raw/main/Pinky's%20AI%20Watermark%20Detector-9.0.user.js
+// @downloadURL  https://github.com/misterpinks/Watermarker/raw/main/Pinky's%20AI%20Watermark%20Detector-9.0.user.js
 // @match        file:///*
 // @match        *://*/*
 // @match        chrome-extension://*/*
@@ -18,7 +18,7 @@
 (function() {
     'use strict';
 
-    console.log('🔍 Enhanced Watermark Detector Started v8.4 (with Image Detection)');
+    console.log('🔍 Enhanced AI Detection Started v9.0 (Watermarks + Writing Patterns + Images)');
 
     // Configuration
     const CONFIG = {
@@ -28,7 +28,8 @@
         linkedinSafeMode: window.location.hostname.includes('linkedin.com'),
         debugMode: false,
         isPDFContext: false,
-        enableImageDetection: true
+        enableImageDetection: true,
+        enableWritingPatternDetection: true
     };
 
     function debugLog(message, data = null) {
@@ -71,9 +72,125 @@
         '\uFEFF': 'Zero Width No-Break Space (BOM)'
     };
 
+    // AI Writing Pattern Detection
+    const AI_WRITING_PATTERNS = {
+        // 1. Inflated symbolism and meaning
+        inflatedSymbolism: {
+            patterns: [
+                /\b(?:is|stands?|serves?) as a testament\b/gi,
+                /\bplays? a (?:vital|significant) role\b/gi,
+                /\bunderscore(?:s|d) its importance\b/gi,
+                /\bcontinue(?:s|d)? to captivate\b/gi,
+                /\bleave(?:s|d)? a lasting impact\b/gi,
+                /\bwatershed moment\b/gi,
+                /\bkey turning point\b/gi,
+                /\bdeeply rooted\b/gi,
+                /\bprofound heritage\b/gi,
+                /\bsteadfast dedication\b/gi,
+                /\bstands? as a\b/gi,
+                /\bsolidifie(?:s|d)\b/gi
+            ],
+            name: 'Inflated Symbolism',
+            description: 'Exaggerated importance and meaning'
+        },
+
+        // 2. Promotional language
+        promotional: {
+            patterns: [
+                /\brich cultural heritage\b/gi,
+                /\brich history\b/gi,
+                /\bbreathtaking\b/gi,
+                /\bmust-visit\b/gi,
+                /\bmust-see\b/gi,
+                /\bstunning natural beauty\b/gi,
+                /\b(?:enduring|lasting) legacy\b/gi,
+                /\brich cultural tapestry\b/gi
+            ],
+            name: 'Promotional Language',
+            description: 'Tourism-like promotional tone'
+        },
+
+        // 3. Editorializing
+        editorializing: {
+            patterns: [
+                /\bit'?s important to (?:note|remember|consider)\b/gi,
+                /\bit is worth\b/gi,
+                /\bno discussion would be complete without\b/gi,
+                /\bin this article\b/gi
+            ],
+            name: 'Editorializing',
+            description: 'Opinion injection in neutral content'
+        },
+
+        // 4. Overuse of conjunctive phrases
+        conjunctive: {
+            patterns: [
+                /\bon the other hand\b/gi,
+                /\bmoreover\b/gi,
+                /\bin addition\b/gi,
+                /\bfurthermore\b/gi,
+                /\bhowever\b/gi,
+                /\bin contrast\b/gi
+            ],
+            name: 'Conjunctive Overuse',
+            description: 'Excessive connecting phrases'
+        },
+
+        // 5. Negative parallelisms
+        negativeParallelism: {
+            patterns: [
+                /\bit'?s not (?:just )?(?:about )?[^,;.]+[,;]\s*it'?s\b/gi,
+                /\bnot only [^,;.]+[,;]\s*but\b/gi,
+                /\bthis (?:isn'?t|is not) [^,;.]+[,;]\s*(?:it'?s|this is)\b/gi
+            ],
+            name: 'Negative Parallelism',
+            description: '"It\'s not X, it\'s Y" structures'
+        },
+
+        // 6. Superficial analyses
+        superficialAnalysis: {
+            patterns: [
+                /,\s*ensuring [^.;]+/gi,
+                /,\s*highlighting [^.;]+/gi,
+                /,\s*emphasizing [^.;]+/gi,
+                /,\s*reflecting [^.;]+/gi,
+                /,\s*improving [^.;]+/gi,
+                /,\s*demonstrating [^.;]+/gi
+            ],
+            name: 'Superficial Analysis',
+            description: 'Empty analytical -ing phrases'
+        },
+
+        // 7. Vague attribution
+        vagueAttribution: {
+            patterns: [
+                /\bindustry reports?\b/gi,
+                /\bobservers have cited\b/gi,
+                /\bsome critics argue\b/gi,
+                /\bexperts suggest\b/gi,
+                /\bstudies show\b/gi,
+                /\bresearch indicates\b/gi
+            ],
+            name: 'Vague Attribution',
+            description: 'Weasel words without clear sources'
+        },
+
+        // 8. Em dash overuse
+        emDashOveruse: {
+            patterns: [
+                /—[^—]+—/g,
+                /\s—\s[^—.!?]+[.!?]/g
+            ],
+            name: 'Em Dash Overuse',
+            description: 'Excessive em dash usage'
+        }
+    };
+
     let detectionCount = 0;
     let imageWatermarkCount = 0;
+    let writingPatternCount = 0;
     let detectionStats = {};
+    let writingPatternStats = {};
     let suspiciousImages = [];
     let processedNodes = new WeakSet();
     let isProcessing = false;
@@ -105,7 +222,7 @@
         }
     }
 
-    // Enhanced CSS with PDF-specific styles and image detection
+    // Enhanced CSS with writing pattern styles
     function addStyles() {
         const styleId = 'watermark-detector-css';
         if (document.getElementById(styleId)) return;
@@ -135,6 +252,21 @@
                 margin-left: 2px !important;
             }
 
+            .wm-highlight.writing-pattern {
+                background: #ff8c00 !important;
+                color: white !important;
+                padding: 1px 4px !important;
+                border-radius: 3px !important;
+                font-size: inherit !important;
+                font-family: inherit !important;
+                font-weight: inherit !important;
+                line-height: inherit !important;
+                display: inline !important;
+                min-width: auto !important;
+                text-decoration: underline !important;
+                vertical-align: baseline !important;
+            }
+
             .wm-highlight:hover::after {
                 content: attr(data-info);
                 position: absolute;
@@ -150,6 +282,9 @@
                 z-index: 10000;
                 pointer-events: none;
                 margin-bottom: 2px;
+                max-width: 300px;
+                white-space: normal;
+                word-wrap: break-word;
             }
 
             .wm-suspicious-image {
@@ -189,11 +324,18 @@
                 z-index: 10000 !important;
                 cursor: pointer !important;
                 border: 1px solid rgba(255, 0, 0, 0.9) !important;
-                min-width: 20px !important;
+                min-width: 30px !important;
                 text-align: center !important;
                 user-select: none !important;
                 transition: all 0.2s ease !important;
                 box-shadow: 0 2px 6px rgba(0,0,0,0.2) !important;
+                display: flex !important;
+                align-items: center !important;
+                gap: 6px !important;
+                flex-direction: column !important;
+            }
+
+            .wm-counter-row {
                 display: flex !important;
                 align-items: center !important;
                 gap: 6px !important;
@@ -256,6 +398,33 @@
                 color: black !important;
             }
 
+            .wm-pattern-toggle {
+                background: rgba(255, 140, 0, 0.8) !important;
+                border: none !important;
+                border-radius: 3px !important;
+                color: white !important;
+                font-size: 8px !important;
+                font-weight: bold !important;
+                padding: 2px 4px !important;
+                cursor: pointer !important;
+                transition: all 0.2s ease !important;
+                min-width: 15px !important;
+                height: 15px !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+            }
+
+            .wm-pattern-toggle:hover {
+                background: rgba(255, 140, 0, 1) !important;
+                transform: scale(1.1) !important;
+            }
+
+            .wm-pattern-toggle.active {
+                background: rgba(255, 215, 0, 0.9) !important;
+                color: black !important;
+            }
+
             .wm-stats-popup {
                 position: fixed !important;
                 top: 50px !important;
@@ -269,12 +438,14 @@
                 z-index: 10001 !important;
                 box-shadow: 0 4px 12px rgba(0,0,0,0.3) !important;
                 border: 1px solid rgba(255, 255, 255, 0.2) !important;
-                max-width: 350px !important;
-                min-width: 200px !important;
+                max-width: 400px !important;
+                min-width: 250px !important;
                 pointer-events: none !important;
                 opacity: 0 !important;
                 transform: translateY(-10px) !important;
                 transition: all 0.2s ease !important;
+                max-height: 80vh !important;
+                overflow-y: auto !important;
             }
 
             .wm-stats-popup.show {
@@ -317,6 +488,10 @@
                 margin-bottom: 4px !important;
             }
 
+            .wm-stats-section-title.writing-patterns {
+                color: #ff8c00 !important;
+            }
+
             .wm-stats-item {
                 display: flex !important;
                 justify-content: space-between !important;
@@ -351,6 +526,22 @@
                 background: rgba(255, 255, 255, 0.1) !important;
                 border-radius: 2px !important;
                 word-break: break-all !important;
+            }
+
+            .wm-pattern-list {
+                max-height: 150px !important;
+                overflow-y: auto !important;
+                font-size: 9px !important;
+                margin-top: 4px !important;
+            }
+
+            .wm-pattern-item {
+                display: block !important;
+                margin: 2px 0 !important;
+                padding: 2px 4px !important;
+                background: rgba(255, 140, 0, 0.2) !important;
+                border-radius: 2px !important;
+                word-break: break-word !important;
             }
 
             .wm-pdf-button {
@@ -430,7 +621,7 @@
         debugLog('CSS styles added successfully');
     }
 
-    // Image watermark detection functions
+    // Image watermark detection functions (existing code)
     function isLikelyWatermarkImage(img) {
         const src = img.src || img.getAttribute('src') || '';
         const alt = img.alt || '';
@@ -438,9 +629,8 @@
         const height = img.height || img.naturalHeight || 0;
         const className = img.className || '';
 
-        // Suspicious filename patterns
         const suspiciousPatterns = [
-            /bull?\.png/i,           // Like Qantas "bull.png"
+            /bull?\.png/i,
             /bullet/i,
             /dot\.png/i,
             /marker\.png/i,
@@ -451,30 +641,19 @@
             /separator\.png/i
         ];
 
-        // Size-based detection (bullets are typically small)
         const isSmallImage = (width > 0 && width < 50) && (height > 0 && height < 50);
-        
-        // Very tiny images (likely decorative/functional)
         const isTinyImage = (width > 0 && width < 20) && (height > 0 && height < 20);
-
-        // Pattern matching
-        const hasWatermarkPattern = suspiciousPatterns.some(pattern => 
+        const hasWatermarkPattern = suspiciousPatterns.some(pattern =>
             pattern.test(src) || pattern.test(alt) || pattern.test(className)
         );
-
-        // Context-based detection
         const isInListContext = img.closest('li, ul, ol') !== null;
-        const hasListRole = img.getAttribute('role') === 'presentation' || 
+        const hasListRole = img.getAttribute('role') === 'presentation' ||
                            img.getAttribute('role') === 'img';
-        
-        // Check if image is used as bullet replacement
-        const isInlineWithText = img.parentElement && 
+        const isInlineWithText = img.parentElement &&
                                 img.parentElement.textContent.trim().length > 0;
-
-        // Check for CSS that suggests bullet usage
         const computedStyle = window.getComputedStyle(img);
         const isFloated = computedStyle.float !== 'none';
-        const isPositioned = computedStyle.position === 'absolute' || 
+        const isPositioned = computedStyle.position === 'absolute' ||
                             computedStyle.position === 'relative';
 
         return (
@@ -491,16 +670,14 @@
             const src = img.src;
             if (!src || src.startsWith('data:')) return null;
 
-            // Try to get file size via fetch
             try {
                 const response = await fetch(src, { method: 'HEAD' });
                 const contentLength = response.headers.get('content-length');
-                
+
                 if (contentLength) {
                     const size = parseInt(contentLength);
-                    
-                    // Flag unusually large files for simple graphics
-                    if (size > 50000) { // 50KB+ for a small graphic is suspicious
+
+                    if (size > 50000) {
                         debugLog(`Large file detected: ${src} (${(size/1024).toFixed(1)}KB)`);
                         return {
                             suspiciousSize: true,
@@ -516,27 +693,24 @@
         } catch (error) {
             debugLog('Error analyzing image metadata', error.message);
         }
-        
+
         return null;
     }
 
     function highlightSuspiciousImage(img, reason = 'Suspicious image detected') {
         img.classList.add('wm-suspicious-image');
-        
         const originalTitle = img.title || '';
         img.title = `${reason} - ${img.src}${originalTitle ? ` | ${originalTitle}` : ''}`;
-        
-        // Add a marker element
+
         const marker = document.createElement('span');
         marker.className = 'wm-highlight image-marker';
         marker.textContent = 'IMG';
         marker.setAttribute('data-info', reason);
-        
-        // Insert marker after the image
+
         if (img.parentNode) {
             img.parentNode.insertBefore(marker, img.nextSibling);
         }
-        
+
         debugLog('Image highlighted', { src: img.src, reason });
     }
 
@@ -547,14 +721,13 @@
         }
 
         debugLog('Starting image watermark detection');
-        
+
         const images = document.querySelectorAll('img, svg use[href*=".png"], svg use[href*=".svg"]');
         let imageCount = 0;
         const foundImages = [];
-        
+
         for (const img of images) {
             try {
-                // Skip our own elements
                 if (img.classList.contains('wm-suspicious-image') ||
                     img.closest('.wm-counter') ||
                     img.closest('.wm-stats-popup')) {
@@ -564,17 +737,14 @@
                 if (isLikelyWatermarkImage(img)) {
                     imageCount++;
                     foundImages.push(img);
-                    
+
                     let reason = 'Suspicious image pattern';
-                    
-                    // Analyze metadata for additional context
                     const metadata = await analyzeImageMetadata(img);
                     if (metadata && metadata.suspiciousSize) {
                         reason = metadata.reason;
                     }
-                    
+
                     highlightSuspiciousImage(img, reason);
-                    
                     debugLog('Suspicious image found', {
                         src: img.src,
                         alt: img.alt,
@@ -586,9 +756,50 @@
                 debugLog('Error analyzing image', error.message);
             }
         }
-        
+
         debugLog(`Image detection complete: ${imageCount} suspicious images found`);
         return { count: imageCount, images: foundImages };
+    }
+
+    // NEW: AI Writing Pattern Detection
+    function processWritingPatterns(text) {
+        if (!CONFIG.enableWritingPatternDetection) {
+            return { text: text, count: 0, patterns: {} };
+        }
+
+        let processedText = text;
+        let foundCount = 0;
+        const localPatterns = {};
+
+        for (const [categoryKey, category] of Object.entries(AI_WRITING_PATTERNS)) {
+            for (const pattern of category.patterns) {
+                try {
+                    const matches = text.match(pattern);
+                    if (matches) {
+                        const count = matches.length;
+                        foundCount += count;
+                        
+                        if (!localPatterns[categoryKey]) {
+                            localPatterns[categoryKey] = { count: 0, name: category.name, matches: [] };
+                        }
+                        localPatterns[categoryKey].count += count;
+                        localPatterns[categoryKey].matches.push(...matches);
+
+                        debugLog(`Found ${count} instances of ${category.name}`, matches);
+
+                        const replacement = (match) => {
+                            return `<span class="wm-highlight writing-pattern" data-info="${category.name}: ${category.description}" data-pattern="${categoryKey}" title="${category.name}: ${match}">${match}</span>`;
+                        };
+
+                        processedText = processedText.replace(pattern, replacement);
+                    }
+                } catch (patternError) {
+                    debugLog('Error processing writing pattern', { category: categoryKey, error: patternError.message });
+                }
+            }
+        }
+
+        return { text: processedText, count: foundCount, patterns: localPatterns };
     }
 
     // PDF-specific popup creation
@@ -622,12 +833,13 @@
         `;
     }
 
-    // Enhanced counter creation with PDF support
+    // Enhanced counter creation with writing pattern support
     function createCounter() {
         debugLog('Creating/updating counter');
 
         let counter = document.getElementById('wm-counter');
         let debugToggle = document.getElementById('wm-debug-toggle');
+        let patternToggle = document.getElementById('wm-pattern-toggle');
         let statsPopup = document.getElementById('wm-stats-popup');
         let debugInfo = document.getElementById('wm-debug-info');
 
@@ -640,18 +852,36 @@
                 'Click to rescan • Hover for details';
             document.body.appendChild(counter);
 
+            // Create first row with toggles
+            const firstRow = document.createElement('div');
+            firstRow.className = 'wm-counter-row';
+            counter.appendChild(firstRow);
+
             // Create debug toggle button
             debugToggle = document.createElement('button');
             debugToggle.id = 'wm-debug-toggle';
             debugToggle.className = 'wm-debug-toggle';
             debugToggle.textContent = 'D';
             debugToggle.title = 'Toggle Debug Mode';
-            counter.appendChild(debugToggle);
+            firstRow.appendChild(debugToggle);
+
+            // Create pattern toggle button
+            patternToggle = document.createElement('button');
+            patternToggle.id = 'wm-pattern-toggle';
+            patternToggle.className = 'wm-pattern-toggle';
+            patternToggle.textContent = 'P';
+            patternToggle.title = 'Toggle Writing Pattern Detection';
+            firstRow.appendChild(patternToggle);
+
+            // Create second row with counts
+            const secondRow = document.createElement('div');
+            secondRow.className = 'wm-counter-row';
+            counter.appendChild(secondRow);
 
             // Create count display
             const countDisplay = document.createElement('span');
             countDisplay.id = 'wm-count-display';
-            counter.appendChild(countDisplay);
+            secondRow.appendChild(countDisplay);
 
             // Create stats popup
             statsPopup = document.createElement('div');
@@ -683,9 +913,22 @@
                 }
             });
 
+            // Pattern toggle handler
+            patternToggle.addEventListener('click', function(e) {
+                e.stopPropagation();
+                CONFIG.enableWritingPatternDetection = !CONFIG.enableWritingPatternDetection;
+                patternToggle.classList.toggle('active', CONFIG.enableWritingPatternDetection);
+
+                console.log(`📝 Writing Pattern Detection: ${CONFIG.enableWritingPatternDetection ? 'ON' : 'OFF'}`);
+                
+                if (!CONFIG.isPDFContext) {
+                    detectWatermarks();
+                }
+            });
+
             // Main counter click handler
             counter.addEventListener('click', function(e) {
-                if (e.target === debugToggle) return;
+                if (e.target === debugToggle || e.target === patternToggle) return;
 
                 e.stopPropagation();
 
@@ -738,20 +981,23 @@
                 countDisplay.textContent = 'PDF';
                 countDisplay.style.fontSize = '9px';
             } else {
-                const totalCount = detectionCount + imageWatermarkCount;
-                countDisplay.textContent = totalCount.toString();
-                countDisplay.style.fontSize = '12px';
+                const totalCount = detectionCount + imageWatermarkCount + writingPatternCount;
+                countDisplay.textContent = `${detectionCount}•${imageWatermarkCount}•${writingPatternCount}`;
+                countDisplay.style.fontSize = '10px';
             }
         }
 
         // Update counter styling based on context
         counter.classList.toggle('pdf-mode', CONFIG.isPDFContext);
-        counter.classList.toggle('dim', !CONFIG.isPDFContext && (detectionCount + imageWatermarkCount) === 0);
+        counter.classList.toggle('dim', !CONFIG.isPDFContext && (detectionCount + imageWatermarkCount + writingPatternCount) === 0);
         counter.classList.toggle('debug-mode', CONFIG.debugMode);
 
-        // Update debug toggle state
+        // Update toggle states
         if (debugToggle) {
             debugToggle.classList.toggle('active', CONFIG.debugMode);
+        }
+        if (patternToggle) {
+            patternToggle.classList.toggle('active', CONFIG.enableWritingPatternDetection);
         }
 
         // Update debug info if in debug mode
@@ -765,6 +1011,7 @@
         debugLog('Counter updated', {
             textCount: detectionCount,
             imageCount: imageWatermarkCount,
+            patternCount: writingPatternCount,
             debugMode: CONFIG.debugMode,
             pdfMode: CONFIG.isPDFContext
         });
@@ -814,44 +1061,46 @@
     window.tryPDFAnalysis = function() {
         debugLog('Attempting limited PDF analysis');
 
-        // Try to extract any accessible text from the page
         const allText = document.body ? document.body.textContent : '';
-        const cleanText = allText.replace(/D0\s*No Watermarks Found[\s\S]*?Debug: ON/g, '').trim();
+        const cleanText = allText.replace(/D\s*P\s*[\s\S]*?Debug: ON/g, '').trim();
 
         if (cleanText.length > 20) {
-            const result = processText(cleanText);
+            const textResult = processText(cleanText);
+            const patternResult = processWritingPatterns(cleanText);
 
-            if (result.count > 0) {
-                alert(`🔍 Limited scan found ${result.count} potential watermark characters!\n\n⚠️ Note: This includes UI elements and may have false positives.\n\nFor accurate results, use a PDF.js-based viewer.`);
+            const totalFindings = textResult.count + patternResult.count;
+
+            if (totalFindings > 0) {
+                alert(`🔍 Limited scan found:\n• ${textResult.count} watermark characters\n• ${patternResult.count} AI writing patterns\n\n⚠️ Note: This includes UI elements and may have false positives.\n\nFor accurate results, use a PDF.js-based viewer.`);
             } else {
-                alert(`🔍 No watermarks detected in accessible content.\n\n⚠️ Important: Chrome's viewer limits access to actual PDF text.\n\nThis doesn't mean the PDF is clean - use PDF.js for comprehensive scanning.`);
+                alert(`🔍 No watermarks or AI patterns detected in accessible content.\n\n⚠️ Important: Chrome's viewer limits access to actual PDF text.\n\nThis doesn't mean the PDF is clean - use PDF.js for comprehensive scanning.`);
             }
         } else {
             alert(`🔍 No accessible text content found.\n\nChrome's PDF viewer completely isolates the PDF content from JavaScript.\n\nRecommended: Use Firefox or PDF.js extension for proper detection.`);
         }
     };
 
-    // Update stats popup content with image detection
+    // Update stats popup content with writing patterns
     function updateStatsPopup() {
         const statsPopup = document.getElementById('wm-stats-popup');
         if (!statsPopup || CONFIG.isPDFContext) return;
 
-        const totalCount = detectionCount + imageWatermarkCount;
+        const totalCount = detectionCount + imageWatermarkCount + writingPatternCount;
 
         if (totalCount === 0) {
             statsPopup.innerHTML = `
-                <div class="wm-stats-header">No Watermarks Found</div>
-                <div style="color: #888; font-style: italic;">Page appears clean</div>
+                <div class="wm-stats-header">No Issues Found</div>
+                <div style="color: #888; font-style: italic;">Content appears clean</div>
             `;
             return;
         }
 
-        let content = `<div class="wm-stats-header">Watermarks Detected: ${totalCount}</div>`;
+        let content = `<div class="wm-stats-header">AI Detection Results: ${totalCount}</div>`;
 
         // Text watermarks section
         if (detectionCount > 0) {
             content += `<div class="wm-stats-section">`;
-            content += `<div class="wm-stats-section-title">📝 Text Watermarks (${detectionCount})</div>`;
+            content += `<div class="wm-stats-section-title">🔴 Invisible Watermarks (${detectionCount})</div>`;
 
             const sortedStats = Object.entries(detectionStats)
                 .sort(([,a], [,b]) => b - a);
@@ -876,8 +1125,8 @@
         // Image watermarks section
         if (imageWatermarkCount > 0) {
             content += `<div class="wm-stats-section">`;
-            content += `<div class="wm-stats-section-title">🖼️ Image Watermarks (${imageWatermarkCount})</div>`;
-            
+            content += `<div class="wm-stats-section-title">🖼️ Suspicious Images (${imageWatermarkCount})</div>`;
+
             if (suspiciousImages.length > 0) {
                 content += `<div class="wm-image-list">`;
                 suspiciousImages.slice(0, 10).forEach((img, index) => {
@@ -886,12 +1135,47 @@
                     const size = img.width && img.height ? ` (${img.width}×${img.height})` : '';
                     content += `<div class="wm-image-item">${index + 1}. ${fileName}${size}</div>`;
                 });
-                
+
                 if (suspiciousImages.length > 10) {
                     content += `<div class="wm-image-item">... and ${suspiciousImages.length - 10} more</div>`;
                 }
                 content += `</div>`;
             }
+            content += `</div>`;
+        }
+
+        // Writing patterns section
+        if (writingPatternCount > 0) {
+            content += `<div class="wm-stats-section">`;
+            content += `<div class="wm-stats-section-title writing-patterns">📝 AI Writing Patterns (${writingPatternCount})</div>`;
+
+            const sortedPatterns = Object.entries(writingPatternStats)
+                .sort(([,a], [,b]) => b.count - a.count);
+
+            sortedPatterns.forEach(([categoryKey, data]) => {
+                content += `
+                    <div class="wm-stats-item">
+                        <div>
+                            <span>${data.name}</span>
+                        </div>
+                        <span class="wm-stats-count">${data.count}</span>
+                    </div>
+                `;
+            });
+
+            // Show some example matches
+            content += `<div class="wm-pattern-list">`;
+            let exampleCount = 0;
+            for (const [categoryKey, data] of Object.entries(writingPatternStats)) {
+                if (exampleCount >= 15) break;
+                data.matches.slice(0, 3).forEach(match => {
+                    if (exampleCount < 15) {
+                        content += `<div class="wm-pattern-item">"${match.length > 50 ? match.substring(0, 50) + '...' : match}"</div>`;
+                        exampleCount++;
+                    }
+                });
+            }
+            content += `</div>`;
             content += `</div>`;
         }
 
@@ -909,7 +1193,9 @@ Processing: ${isProcessing}
 Nodes Processed: ${processedNodes.size || 0}
 Text Watermarks: ${detectionCount}
 Image Watermarks: ${imageWatermarkCount}
+Writing Patterns: ${writingPatternCount}
 Image Detection: ${CONFIG.enableImageDetection ? 'ON' : 'OFF'}
+Pattern Detection: ${CONFIG.enableWritingPatternDetection ? 'ON' : 'OFF'}
 Time: ${processingStartTime ? (Date.now() - processingStartTime) + 'ms' : 'N/A'}
 URL: ${window.location.hostname}
 Debug: ON`;
@@ -917,7 +1203,7 @@ Debug: ON`;
         debugInfo.textContent = debugText;
     }
 
-    // Safe node validation
+    // Safe node validation (existing code)
     function isValidTextNode(node) {
         try {
             if (!node || !node.parentElement) {
@@ -989,7 +1275,7 @@ Debug: ON`;
         }
     }
 
-    // Enhanced text processing
+    // Enhanced text processing (existing watermark code)
     function processText(text) {
         try {
             let processedText = text;
@@ -1038,18 +1324,20 @@ Debug: ON`;
         }
     }
 
-    // Batch processing
+    // Batch processing with writing patterns
     async function processBatch(nodes, startIndex, batchSize) {
         const endIndex = Math.min(startIndex + batchSize, nodes.length);
         debugLog(`Processing batch ${startIndex}-${endIndex} of ${nodes.length}`);
 
         let batchCount = 0;
+        let batchPatternCount = 0;
         const batchStats = {};
+        const batchPatternStats = {};
 
         for (let i = startIndex; i < endIndex; i++) {
             if (Date.now() - processingStartTime > CONFIG.maxProcessingTime) {
                 debugLog('Time limit reached, stopping processing');
-                return { count: batchCount, stats: batchStats, stopped: true };
+                return { count: batchCount, patternCount: batchPatternCount, stats: batchStats, patternStats: batchPatternStats, stopped: true };
             }
 
             try {
@@ -1061,17 +1349,41 @@ Debug: ON`;
                 }
 
                 const originalText = textNode.textContent;
-                const result = processText(originalText);
+                
+                // Process watermarks first
+                const watermarkResult = processText(originalText);
+                
+                // Then process writing patterns
+                const patternResult = processWritingPatterns(watermarkResult.text);
 
-                if (result.count > 0) {
-                    batchCount += result.count;
+                let finalText = patternResult.text;
+                let nodeModified = false;
 
-                    for (const [char, count] of Object.entries(result.stats)) {
+                if (watermarkResult.count > 0) {
+                    batchCount += watermarkResult.count;
+                    nodeModified = true;
+
+                    for (const [char, count] of Object.entries(watermarkResult.stats)) {
                         batchStats[char] = (batchStats[char] || 0) + count;
                     }
+                }
 
+                if (patternResult.count > 0) {
+                    batchPatternCount += patternResult.count;
+                    nodeModified = true;
+
+                    for (const [categoryKey, data] of Object.entries(patternResult.patterns)) {
+                        if (!batchPatternStats[categoryKey]) {
+                            batchPatternStats[categoryKey] = { count: 0, name: data.name, matches: [] };
+                        }
+                        batchPatternStats[categoryKey].count += data.count;
+                        batchPatternStats[categoryKey].matches.push(...data.matches);
+                    }
+                }
+
+                if (nodeModified) {
                     const wrapper = document.createElement('span');
-                    wrapper.innerHTML = result.text;
+                    wrapper.innerHTML = finalText;
                     textNode.parentNode.replaceChild(wrapper, textNode);
                 }
 
@@ -1082,10 +1394,10 @@ Debug: ON`;
             }
         }
 
-        return { count: batchCount, stats: batchStats, stopped: false };
+        return { count: batchCount, patternCount: batchPatternCount, stats: batchStats, patternStats: batchPatternStats, stopped: false };
     }
 
-    // Main detection function with image support
+    // Main detection function with all features
     async function detectWatermarks() {
         if (isProcessing) {
             debugLog('Detection already in progress, skipping');
@@ -1100,10 +1412,11 @@ Debug: ON`;
 
         isProcessing = true;
         processingStartTime = Date.now();
-        debugLog('Starting watermark detection', {
+        debugLog('Starting comprehensive AI detection', {
             url: window.location.href,
             linkedinMode: CONFIG.linkedinSafeMode,
-            imageDetection: CONFIG.enableImageDetection
+            imageDetection: CONFIG.enableImageDetection,
+            patternDetection: CONFIG.enableWritingPatternDetection
         });
 
         try {
@@ -1112,9 +1425,17 @@ Debug: ON`;
             document.querySelectorAll('.wm-highlight').forEach(highlight => {
                 try {
                     const parent = highlight.parentNode;
-                    const originalChar = highlight.getAttribute('data-original-char') || '';
-                    if (parent) {
-                        parent.replaceChild(document.createTextNode(originalChar), highlight);
+                    if (highlight.classList.contains('writing-pattern')) {
+                        // For writing patterns, restore original text
+                        if (parent) {
+                            parent.replaceChild(document.createTextNode(highlight.textContent), highlight);
+                        }
+                    } else {
+                        // For watermarks, restore original character
+                        const originalChar = highlight.getAttribute('data-original-char') || '';
+                        if (parent) {
+                            parent.replaceChild(document.createTextNode(originalChar), highlight);
+                        }
                     }
                 } catch (cleanupError) {
                     debugLog('Error during cleanup', cleanupError.message);
@@ -1136,7 +1457,9 @@ Debug: ON`;
             // Reset counters
             detectionCount = 0;
             imageWatermarkCount = 0;
+            writingPatternCount = 0;
             detectionStats = {};
+            writingPatternStats = {};
             suspiciousImages = [];
             processedNodes = new WeakSet();
 
@@ -1200,9 +1523,18 @@ Debug: ON`;
                 const result = await processBatch(textNodes, currentIndex, CONFIG.batchSize);
 
                 detectionCount += result.count;
+                writingPatternCount += result.patternCount;
 
                 for (const [char, count] of Object.entries(result.stats)) {
                     detectionStats[char] = (detectionStats[char] || 0) + count;
+                }
+
+                for (const [categoryKey, data] of Object.entries(result.patternStats)) {
+                    if (!writingPatternStats[categoryKey]) {
+                        writingPatternStats[categoryKey] = { count: 0, name: data.name, matches: [] };
+                    }
+                    writingPatternStats[categoryKey].count += data.count;
+                    writingPatternStats[categoryKey].matches.push(...data.matches);
                 }
 
                 if (result.stopped) {
@@ -1221,36 +1553,39 @@ Debug: ON`;
             }
 
             const processingTime = Date.now() - processingStartTime;
-            const totalCount = detectionCount + imageWatermarkCount;
-            
+            const totalCount = detectionCount + imageWatermarkCount + writingPatternCount;
+
             debugLog(`Detection complete`, {
                 textCount: detectionCount,
                 imageCount: imageWatermarkCount,
+                patternCount: writingPatternCount,
                 totalCount: totalCount,
                 time: processingTime + 'ms',
-                stats: detectionStats
+                stats: detectionStats,
+                patterns: writingPatternStats
             });
 
             if (CONFIG.debugMode && totalCount > 0) {
-                console.log('📊 Watermark breakdown:', {
-                    text: detectionStats,
-                    images: suspiciousImages.map(img => img.src)
+                console.log('📊 AI Detection breakdown:', {
+                    watermarks: detectionStats,
+                    images: suspiciousImages.map(img => img.src),
+                    patterns: writingPatternStats
                 });
             }
 
         } catch (error) {
             debugLog('Critical error during detection', error.message);
-            console.error('Watermark detection error:', error);
+            console.error('AI detection error:', error);
         } finally {
             isProcessing = false;
             createCounter();
         }
     }
 
-    // Enhanced initialization with PDF support
+    // Enhanced initialization
     function init() {
         try {
-            debugLog('Initializing watermark detector');
+            debugLog('Initializing enhanced AI detector');
 
             // Check for PDF context first
             if (detectPDFContext()) {
@@ -1265,7 +1600,7 @@ Debug: ON`;
                 createCounter();
                 setTimeout(() => {
                     showPDFPopup();
-                }, 2000); // Show PDF guidance after 2 seconds
+                }, 2000);
             } else {
                 // Normal HTML detection
                 const initDelay = CONFIG.linkedinSafeMode ? 3000 : 1000;
@@ -1283,10 +1618,18 @@ Debug: ON`;
                 const debugToggle = document.getElementById('wm-debug-toggle');
                 if (debugToggle) debugToggle.click();
             };
-            
+
             window.toggleImageDetection = () => {
                 CONFIG.enableImageDetection = !CONFIG.enableImageDetection;
                 console.log(`🖼️ Image detection: ${CONFIG.enableImageDetection ? 'ON' : 'OFF'}`);
+                if (!CONFIG.isPDFContext) {
+                    detectWatermarks();
+                }
+            };
+
+            window.togglePatternDetection = () => {
+                CONFIG.enableWritingPatternDetection = !CONFIG.enableWritingPatternDetection;
+                console.log(`📝 Pattern detection: ${CONFIG.enableWritingPatternDetection ? 'ON' : 'OFF'}`);
                 if (!CONFIG.isPDFContext) {
                     detectWatermarks();
                 }
@@ -1317,16 +1660,23 @@ Debug: ON`;
                     e.preventDefault();
                     window.toggleImageDetection();
                 }
+
+                // Toggle pattern detection
+                if (e.ctrlKey && e.shiftKey && e.key === 'T') {
+                    e.preventDefault();
+                    window.togglePatternDetection();
+                }
             });
 
-            debugLog('Initialization complete', { 
+            debugLog('Initialization complete', {
                 pdfMode: CONFIG.isPDFContext,
-                imageDetection: CONFIG.enableImageDetection
+                imageDetection: CONFIG.enableImageDetection,
+                patternDetection: CONFIG.enableWritingPatternDetection
             });
 
         } catch (error) {
             debugLog('Error during initialization', error.message);
-            console.error('Watermark detector init error:', error);
+            console.error('Enhanced AI detector init error:', error);
         }
     }
 
@@ -1337,6 +1687,6 @@ Debug: ON`;
         setTimeout(init, 500);
     }
 
-    debugLog('Enhanced watermark detector loaded with image detection support');
+    debugLog('Enhanced AI detector loaded with watermark, image, and writing pattern detection');
 
 })();
