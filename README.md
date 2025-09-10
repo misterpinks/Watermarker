@@ -21,13 +21,26 @@ A quick and dirty Tampermonkey userscript that detects invisible watermarks and 
 1. Install [Tampermonkey](https://www.tampermonkey.net/) browser extension
 2. **[Click here to install the script](https://github.com/misterpinks/Watermarker/raw/refs/heads/main/Pinky's%20AI%20Watermark%20Detector-8.1.user.js)**
 3. Click "Install" when Tampermonkey opens
-4. You're done! The red counter will appear on websites with watermarks
+4. You're done! The red counter will appear on websites with watermarks (Scrill down and you should see some red W's)
 
 ### Option 2: Manual Install
 1. Download the [latest script file](https://github.com/misterpinks/Watermarker/raw/refs/heads/main/Pinky's%20AI%20Watermark%20Detector-8.1.user.js)
 2. Open Tampermonkey Dashboard
 3. Click "Utilities" tab
 4. Drag and drop the `.user.js` file into the import area
+
+###  N.B. If you want it to see local files
+You will need to Make sure your browser allows extensions to access file URLs:
+1. Go to chrome://extensions/
+2. Find Tampermonkey
+3. Click "Details"
+4. Enable "Allow access to file URLs"
+
+5. Open Tampermonkey dashboard
+6. Go to Settings tab
+7. Find "Config mode" and set it to "Advanced"
+8. Look for Security and "Allow access to file URLs" and set to allow all local files
+9. Hit the save button
 
 ## 🎮 How to Use
 
