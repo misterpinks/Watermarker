@@ -1,13 +1,14 @@
 // ==UserScript==
-// @name         Pinky's AI Watermark & Writing Pattern Detector
+// @name         Pinky's AI Watermark Detector
+// @version      9.1
 // @namespace    http://tampermonkey.net/
-// @version      9.0
 // @description  Enhanced detector with invisible watermarks, image detection, and AI writing pattern recognition
 // @author       @ericpink
 // @homepage     https://github.com/misterpinks/Watermarker
 // @supportURL   https://github.com/misterpinks/Watermarker/issues
-// @updateURL    https://github.com/misterpinks/Watermarker/raw/main/Pinky's%20AI%20Watermark%20Detector-9.0.user.js
-// @downloadURL  https://github.com/misterpinks/Watermarker/raw/main/Pinky's%20AI%20Watermark%20Detector-9.0.user.js
+
+// @updateURL    https://github.com/misterpinks/Watermarker/raw/main/watermark-detector.user.js
+// @downloadURL  https://github.com/misterpinks/Watermarker/raw/main/watermark-detector.user.js
 // @match        file:///*
 // @match        *://*/*
 // @match        chrome-extension://*/*
