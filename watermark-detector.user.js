@@ -10,8 +10,11 @@
 // @updateURL    https://github.com/misterpinks/Watermarker/raw/main/watermark-detector.user.js
 // @downloadURL  https://github.com/misterpinks/Watermarker/raw/main/watermark-detector.user.js
 // @match        file:///*
-// @match        *://*/*
+// @match        http://*/*
+// @match        https://*/*
 // @match        chrome-extension://*/*
+// @match        https://claude.ai/*
+// @include      *
 // @grant        none
 // @run-at       document-end
 // ==/UserScript==
@@ -73,120 +76,223 @@
         '\uFEFF': 'Zero Width No-Break Space (BOM)'
     };
 
-    // AI Writing Pattern Detection
-    const AI_WRITING_PATTERNS = {
-        // 1. Inflated symbolism and meaning
-        inflatedSymbolism: {
-            patterns: [
-                /\b(?:is|stands?|serves?) as a testament\b/gi,
-                /\bplays? a (?:vital|significant) role\b/gi,
-                /\bunderscore(?:s|d) its importance\b/gi,
-                /\bcontinue(?:s|d)? to captivate\b/gi,
-                /\bleave(?:s|d)? a lasting impact\b/gi,
-                /\bwatershed moment\b/gi,
-                /\bkey turning point\b/gi,
-                /\bdeeply rooted\b/gi,
-                /\bprofound heritage\b/gi,
-                /\bsteadfast dedication\b/gi,
-                /\bstands? as a\b/gi,
-                /\bsolidifie(?:s|d)\b/gi
-            ],
-            name: 'Inflated Symbolism',
-            description: 'Exaggerated importance and meaning'
-        },
+   // AI Writing Pattern Detection - Enhanced with Emoji Detection
+const AI_WRITING_PATTERNS = {
+    // 1. Inflated symbolism and meaning
+    inflatedSymbolism: {
+        patterns: [
+            /\b(?:is|stands?|serves?) as a testament\b/gi,
+            /\bplays? a (?:vital|significant) role\b/gi,
+            /\bunderscore(?:s|d) its importance\b/gi,
+            /\bcontinue(?:s|d)? to captivate\b/gi,
+            /\bleave(?:s|d)? a lasting impact\b/gi,
+            /\bwatershed moment\b/gi,
+            /\bkey turning point\b/gi,
+            /\bdeeply rooted\b/gi,
+            /\bprofound heritage\b/gi,
+            /\bsteadfast dedication\b/gi,
+            /\bstands? as a\b/gi,
+            /\bsolidifie(?:s|d)\b/gi
+        ],
+        name: 'Inflated Symbolism',
+        description: 'Exaggerated importance and meaning'
+    },
 
-        // 2. Promotional language
-        promotional: {
-            patterns: [
-                /\brich cultural heritage\b/gi,
-                /\brich history\b/gi,
-                /\bbreathtaking\b/gi,
-                /\bmust-visit\b/gi,
-                /\bmust-see\b/gi,
-                /\bstunning natural beauty\b/gi,
-                /\b(?:enduring|lasting) legacy\b/gi,
-                /\brich cultural tapestry\b/gi
-            ],
-            name: 'Promotional Language',
-            description: 'Tourism-like promotional tone'
-        },
+    // 2. Promotional language
+    promotional: {
+        patterns: [
+            /\brich cultural heritage\b/gi,
+            /\brich history\b/gi,
+            /\bbreathtaking\b/gi,
+            /\bmust-visit\b/gi,
+            /\bmust-see\b/gi,
+            /\bstunning natural beauty\b/gi,
+            /\b(?:enduring|lasting) legacy\b/gi,
+            /\brich cultural tapestry\b/gi
+        ],
+        name: 'Promotional Language',
+        description: 'Tourism-like promotional tone'
+    },
 
-        // 3. Editorializing
-        editorializing: {
-            patterns: [
-                /\bit'?s important to (?:note|remember|consider)\b/gi,
-                /\bit is worth\b/gi,
-                /\bno discussion would be complete without\b/gi,
-                /\bin this article\b/gi
-            ],
-            name: 'Editorializing',
-            description: 'Opinion injection in neutral content'
-        },
+    // 3. Editorializing
+    editorializing: {
+        patterns: [
+            /\bit'?s important to (?:note|remember|consider)\b/gi,
+            /\bit is worth\b/gi,
+            /\bno discussion would be complete without\b/gi,
+            /\bin this article\b/gi
+        ],
+        name: 'Editorializing',
+        description: 'Opinion injection in neutral content'
+    },
 
-        // 4. Overuse of conjunctive phrases
-        conjunctive: {
-            patterns: [
-                /\bon the other hand\b/gi,
-                /\bmoreover\b/gi,
-                /\bin addition\b/gi,
-                /\bfurthermore\b/gi,
-                /\bhowever\b/gi,
-                /\bin contrast\b/gi
-            ],
-            name: 'Conjunctive Overuse',
-            description: 'Excessive connecting phrases'
-        },
+    // 4. Overuse of conjunctive phrases
+    conjunctive: {
+        patterns: [
+            /\bon the other hand\b/gi,
+            /\bmoreover\b/gi,
+            /\bin addition\b/gi,
+            /\bfurthermore\b/gi,
+            /\bhowever\b/gi,
+            /\bin contrast\b/gi
+        ],
+        name: 'Conjunctive Overuse',
+        description: 'Excessive connecting phrases'
+    },
 
-        // 5. Negative parallelisms
-        negativeParallelism: {
-            patterns: [
-                /\bit'?s not (?:just )?(?:about )?[^,;.]+[,;]\s*it'?s\b/gi,
-                /\bnot only [^,;.]+[,;]\s*but\b/gi,
-                /\bthis (?:isn'?t|is not) [^,;.]+[,;]\s*(?:it'?s|this is)\b/gi
-            ],
-            name: 'Negative Parallelism',
-            description: '"It\'s not X, it\'s Y" structures'
-        },
+    // 5. Negative parallelisms
+    negativeParallelism: {
+        patterns: [
+            /\bit'?s not (?:just )?(?:about )?[^,;.]+[,;]\s*it'?s\b/gi,
+            /\bnot only [^,;.]+[,;]\s*but\b/gi,
+            /\bthis (?:isn'?t|is not) [^,;.]+[,;]\s*(?:it'?s|this is)\b/gi
+        ],
+        name: 'Negative Parallelism',
+        description: '"It\'s not X, it\'s Y" structures'
+    },
 
-        // 6. Superficial analyses
-        superficialAnalysis: {
-            patterns: [
-                /,\s*ensuring [^.;]+/gi,
-                /,\s*highlighting [^.;]+/gi,
-                /,\s*emphasizing [^.;]+/gi,
-                /,\s*reflecting [^.;]+/gi,
-                /,\s*improving [^.;]+/gi,
-                /,\s*demonstrating [^.;]+/gi
-            ],
-            name: 'Superficial Analysis',
-            description: 'Empty analytical -ing phrases'
-        },
+    // 6. Superficial analyses
+    superficialAnalysis: {
+        patterns: [
+            /,\s*ensuring [^.;]+/gi,
+            /,\s*highlighting [^.;]+/gi,
+            /,\s*emphasizing [^.;]+/gi,
+            /,\s*reflecting [^.;]+/gi,
+            /,\s*improving [^.;]+/gi,
+            /,\s*demonstrating [^.;]+/gi
+        ],
+        name: 'Superficial Analysis',
+        description: 'Empty analytical -ing phrases'
+    },
 
-        // 7. Vague attribution
-        vagueAttribution: {
-            patterns: [
-                /\bindustry reports?\b/gi,
-                /\bobservers have cited\b/gi,
-                /\bsome critics argue\b/gi,
-                /\bexperts suggest\b/gi,
-                /\bstudies show\b/gi,
-                /\bresearch indicates\b/gi
-            ],
-            name: 'Vague Attribution',
-            description: 'Weasel words without clear sources'
-        },
+    // 7. Vague attribution
+    vagueAttribution: {
+        patterns: [
+            /\bindustry reports?\b/gi,
+            /\bobservers have cited\b/gi,
+            /\bsome critics argue\b/gi,
+            /\bexperts suggest\b/gi,
+            /\bstudies show\b/gi,
+            /\bresearch indicates\b/gi
+        ],
+        name: 'Vague Attribution',
+        description: 'Weasel words without clear sources'
+    },
 
-        // 8. Em dash overuse
-        emDashOveruse: {
-            patterns: [
-                /—[^—]+—/g,
-                /\s—\s[^—.!?]+[.!?]/g
-            ],
-            name: 'Em Dash Overuse',
-            description: 'Excessive em dash usage'
-        }
-    };
+    // 8. Em dash overuse
+    emDashOveruse: {
+        patterns: [
+            /—[^—]+—/g,
+            /\s—\s[^—.!?]+[.!?]/g
+        ],
+        name: 'Em Dash Overuse',
+        description: 'Excessive em dash usage'
+    },
 
+    // 9. NEW: Suspicious emoji usage
+    suspiciousEmojis: {
+        patterns: [
+            // Star emojis (often used for emphasis)
+            /⭐/g,
+            /🌟/g,
+            /✨/g,
+            /⭐️/g,
+
+            // Rocket/growth emojis (startup/business language)
+            /🚀/g,
+            /📈/g,
+            /💪/g,
+            /🎯/g,
+
+            // Check marks (listicle/productivity content)
+            /✅/g,
+            /☑️/g,
+            /✔️/g,
+
+            // Fire/hot emojis (trendy content)
+            /🔥/g,
+            /💥/g,
+            /⚡/g,
+            /💯/g,
+
+            // Money/success emojis (promotional content)
+            /💰/g,
+            /💎/g,
+            /🏆/g,
+            /🎉/g,
+            /🎊/g,
+
+            // Light bulb/idea emojis (insight content)
+            /💡/g,
+            /🧠/g,
+            /💭/g,
+
+            // Warning/attention emojis (clickbait)
+            /⚠️/g,
+            /🚨/g,
+            /❗/g,
+            /❓/g,
+            /‼️/g,
+            /📍/g,
+
+            // Heart/emotion emojis (engagement bait)
+            /❤️/g,
+            /💖/g,
+            /😍/g,
+            /🥰/g,
+
+            // Hand gesture emojis (call-to-action)
+            /👆/g,
+            /👇/g,
+            /👈/g,
+            /👉/g,
+            /👏/g,
+            /🙌/g,
+
+            // Eye emojis (attention-grabbing)
+            /👀/g,
+            /👁️/g,
+
+            // Time/urgency emojis
+            /⏰/g,
+            /⏳/g,
+            /⌛/g,
+
+            // Crown/premium emojis
+            /👑/g,
+            /💫/g,
+
+            // Additional emojis
+            /🎁/g,
+            /🎪/g,
+            /🌈/g,
+            /🔑/g,
+            /🗝️/g,
+            /📊/g,
+
+            // Face with specific emotions often used in AI content
+            /🤔/g,
+            /😎/g,
+            /🤩/g,
+            /😱/g,
+
+            // Technology/digital emojis
+            /💻/g,
+            /📱/g,
+            /🖥️/g,
+            /⚙️/g,
+            /🔧/g,
+
+            // Globe/world emojis (global content)
+            /🌍/g,
+            /🌎/g,
+            /🌏/g,
+            /🌐/g
+        ],
+        name: 'Suspicious Emojis',
+        description: 'AI-generated content often overuses specific emojis for engagement'
+    }
+};
     let detectionCount = 0;
     let imageWatermarkCount = 0;
     let writingPatternCount = 0;
